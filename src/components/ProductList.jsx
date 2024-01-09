@@ -1,78 +1,56 @@
 // Import necessary libraries
-import { useEffect, useMemo, useState } from 'react';
-import TableContainer from '../components/TableContainer.jsx';
+import React from 'react';
+import { useQuery } from 'react-query';
+import axios from 'axios';
+import TableContainer from './TableContainer';
 
+// Fetching data from api
+const fetchData = async () => {
+  const response = await axios.get('https://s3.amazonaws.com/open-to-cors/assignment.json'); 
+  return response.data;
+};
+
+// ProductList component
 const ProductList = () => {
+  // Handling data
+  const { data, error, isLoading } = useQuery('products', fetchData);
 
-    const apiUrl = 'https://s3.amazonaws.com/open-to-cors/assignment.json';
-    const [memoizedData, setMemoizedData] = useState({});
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
+  // Handling loading state
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-                setMemoizedData(data?.products);
+  // Handling error 
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    const allData = useMemo(() => {
-        if (!memoizedData || Object.keys(memoizedData).length === 0) {
-            return []; // Return an empty array or some default value if memoizedData is empty
-        }
-        const arrayOfObjects = Object.values(memoizedData);
-
-        return arrayOfObjects.sort((a, b) => parseInt(b.popularity, 10) - parseInt(a.popularity, 10));
-    }, [])
-    const columns = useMemo(() => [
-        {
-            Header: "Sub Category",
-            accessor: "subcategory",
-            Cell: cellProps => {
-                return cellProps.value;
-            },
-        },
-        {
-            Header: "Title",
-            accessor: "title",
-            Cell: cellProps => {
-                return cellProps.value;
-            },
-        },
-        {
-            Header: "Price",
-            accessor: "price",
-            Cell: cellProps => {
-                return cellProps.value;
-            },
-        },
-        {
-            Header: "Popularity",
-            accessor: "popularity",
-            Cell: cellProps => {
-                return cellProps.value;
-            },
-        },
-    ], [allData]);
-
-    return (
-        <div>
-            <h1>Product List</h1>
-            <TableContainer
-                data={allData || []}
-                columns={columns}
-            />
-        </div>
-    )
-}
+//   const columns = [
+//     { id: '1', label: 'Id' },
+//     { id: '2', label: 'Sub Category' },
+//     { id: '3', label: 'Title' },
+//     { id: '4', label: 'Price' },
+//     { id: '5', label: 'Popularity' },
+//   ]
+  //Display 
+  return (
+    <div>
+      <h1>Product List</h1>
+      {data && data.count > 0 && (
+        // <ul>
+        //   {Object.keys(data.products).map((productId) => {
+        //     const product = data.products[productId];
+        //     return (
+        //       <li key={productId}>
+        //         <strong>{product.title}</strong> - {product.price} - Popularity: {product.popularity}
+        //       </li>
+        //     );
+        //   })}
+        // </ul>
+        <TableContainer data = {data}/>
+      )}
+    </div>
+  );
+};
 
 export default ProductList;

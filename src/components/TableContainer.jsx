@@ -1,43 +1,31 @@
 import React from "react";
-import { useTable } from "react-table";
 
 // TableContainer component
-const TableContainer = ({ columns, data }) => {
-  const {
-    getTableProps, // Table props from react-table
-    getTableBodyProps, // Table body props from react-table
-    headerGroups, 
-    rows, // Rows for the table based on the data passed
-    prepareRow 
-  } = useTable({
-    columns,
-    data
-  });
+const TableContainer = ({ data }) => {
+  // Sort the products based on popularity in descending order
+  const sortedProducts = Object.values(data.products).sort((a, b) => b.popularity - a.popularity);
 
   return (
-    <table {...getTableProps()}>
-      {/* Table Header */}
+    <table>
       <thead>
-        {headerGroups.map(headerGroup => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map(column => (
-              <th {...column.getHeaderProps()}>{column.render("Header")}</th>
-            ))}
+        <tr>
+          <th>Id</th>
+          <th>Sub Category</th>
+          <th>Title</th>
+          <th>Price</th>
+          <th>Popularity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedProducts.map((product, index) => (
+          <tr key={index}>
+            <td>{index + 1}</td>
+            <td>{product.subcategory}</td>
+            <td>{product.title}</td>
+            <td>{product.price}</td>
+            <td>{product.popularity}</td>
           </tr>
         ))}
-      </thead>
-      {/* Table Body */}
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row, i) => {
-          prepareRow(row);
-          return (
-            <tr {...row.getRowProps()}>
-              {row.cells.map(cell => (
-                <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-              ))}
-            </tr>
-          );
-        })}
       </tbody>
     </table>
   );
